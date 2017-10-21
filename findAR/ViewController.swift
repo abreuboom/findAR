@@ -11,7 +11,9 @@ import SceneKit
 import ARKit
 
 class ViewController: UIViewController, ARSCNViewDelegate {
-
+    
+    let interactor = Interactor()
+    
     @IBOutlet var sceneView: ARSCNView!
     
     override func viewDidLoad() {
@@ -35,7 +37,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         // Create a session configuration
         let configuration = ARWorldTrackingConfiguration()
-
+        
         // Run the view's session
         sceneView.session.run(configuration)
     }
@@ -51,17 +53,17 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         super.didReceiveMemoryWarning()
         // Release any cached data, images, etc that aren't in use.
     }
-
+    
     // MARK: - ARSCNViewDelegate
     
-/*
-    // Override to create and configure nodes for anchors added to the view's session.
-    func renderer(_ renderer: SCNSceneRenderer, nodeFor anchor: ARAnchor) -> SCNNode? {
-        let node = SCNNode()
+    /*
+     // Override to create and configure nodes for anchors added to the view's session.
+     func renderer(_ renderer: SCNSceneRenderer, nodeFor anchor: ARAnchor) -> SCNNode? {
+     let node = SCNNode()
      
-        return node
-    }
-*/
+     return node
+     }
+     */
     
     func session(_ session: ARSession, didFailWithError error: Error) {
         // Present an error message to the user
@@ -76,5 +78,22 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     func sessionInterruptionEnded(_ session: ARSession) {
         // Reset tracking and/or remove existing anchors if consistent tracking is required
         
+    }
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if let destinationViewController = segue.destination as? MapViewController {
+            destinationViewController.transitioningDelegate = self
+            destinationViewController.interactor = interactor
+        }
+    }
+    
+}
+
+extension ViewController: UIViewControllerTransitioningDelegate {
+    func animationControllerForDismissedController(dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+        return DismissAnimator()
+    }
+    
+    func interactionControllerForDismissal(using animator: UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning? {
+        return interactor.started ? interactor : nil
     }
 }
